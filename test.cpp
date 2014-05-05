@@ -17,6 +17,9 @@ int main() {
     // read g2 status
     bool status_g2 = g2.value();
 
+    // write 1 times high->low change
+    g1.down();
+
     // write 50 times low->high change
     g1.up(50);
 
