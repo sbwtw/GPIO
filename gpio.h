@@ -29,6 +29,12 @@ public:
     void low() const;
     void high() const;
 
+    // 产生脉冲
+    // @lowWidth 低电平时间
+    // @highWidth 高电平时间
+    // @times 完整的周期数
+    void pulse(unsigned lowWidth = 1, unsigned highWidth = 1, unsigned times = 1) const;
+
     // 产生上升/下降沿
     void up(unsigned times = 1) const;
     void down(unsigned times = 1) const;
@@ -37,6 +43,9 @@ public:
     bool value() const;
     // 读取方向
     DIRECTION direction() const;
+
+    // gpio是否已经存在
+    static bool exist(unsigned gpio);
 
 protected:
     // 导出

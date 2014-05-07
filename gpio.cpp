@@ -1,8 +1,21 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "gpio.h"
+
+bool GPIO::exist(unsigned gpio) {
+    struct stat buff;
+    std::stringstream ss;
+    ss << "/sys/class/gpio/gpio";
+    ss << gpio;
+    
+    if (0 == lstat(ss.str().c_str(), &buff)) 
+        return true;
+
+    return false;
+}
 
 bool GPIO::value() const {
     std::stringstream ss;
@@ -58,23 +71,31 @@ void GPIO::setPort(unsigned port) {
 }
 
 void GPIO::down(unsigned times) const {
-    unsigned count(0);
 
-    do {
+    while (times--) {
         this->high();
         this->low();
         usleep(1);
-    } while (++count != times);
+    }
+}
+
+void GPIO::pulse(unsigned lowWidth, unsigned highWidth, unsigned times) const {
+
+    while (times--) {
+        this->low();
+        usleep(lowWidth);
+        this->high();
+        usleep(highWidth);
+    }
 }
 
 void GPIO::up(unsigned times) const {
-    unsigned count(0);
     
-    do {
+    while (times--) {
         this->low();
         this->high();
         usleep(1);
-    } while (++count != times);
+    }
 }
 
 void GPIO::high() const {
@@ -119,7 +140,7 @@ void GPIO::unexportPort() const {
     std::ofstream out(str.c_str());
 
     if (out.fail()) {
-        std::cout << "unexportPort fail!" << std::endl;
+        std::cout << "unexport GPIO" << this->port << " fail!" << std::endl;
         return ;
     }
 
@@ -128,12 +149,18 @@ void GPIO::unexportPort() const {
 }
 
 void GPIO::exportPort() const {
+
+    if (this->exist(this->port)) {
+        std::cout << "Warning: GPIO" << this->port << " already setup!" << std::endl;
+        return ;
+    }
+
     std::string str("/sys/class/gpio/export");
 
     std::ofstream out(str.c_str());
 
     if (out.fail()) {
-        std::cout << "exportPort fail!" << std::endl;
+        std::cout << "export GPIO" << this->port << " fail!" << std::endl;
         return ;
     }
 
