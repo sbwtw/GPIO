@@ -26,7 +26,7 @@ bool GPIO::value() const {
     std::ifstream in(ss.str().c_str());
 
     if (in.fail()) {
-        std::cout << "read gpio " << this->port
+        std::cout << "read gpio" << this->port
                     << " value fail!" << std::endl;
         return false;
     }
@@ -41,6 +41,31 @@ bool GPIO::value() const {
         return false;
 }
 
+GPIO::DIRECTION GPIO::direction() const {
+    std::stringstream ss;
+    ss << "/sys/class/gpio/gpio";
+    ss << this->port;
+    ss << "/direction";
+
+    std::ifstream in(ss.str().c_str());
+
+    if (in.fail()) {
+        std::cout << "read gpio" << this->port
+                    << " Direction fail!" << std::endl;
+        return DIRECTION::IN;
+    }
+
+    std::string str;
+
+    in >> str;
+    in.close();
+
+    if (str == "in")
+        return DIRECTION::IN;
+    else 
+        return DIRECTION::OUT;
+}
+
 void GPIO::setDirection(DIRECTION dir) {
     std::stringstream ss;
     ss << "/sys/class/gpio/gpio";
@@ -50,7 +75,7 @@ void GPIO::setDirection(DIRECTION dir) {
     std::ofstream out(ss.str().c_str());
 
     if (out.fail()) {
-        std::cout << "set gpio " << this->port
+        std::cout << "set gpio" << this->port
                     << " Direction fail!" << std::endl;
         return ;
     }
@@ -64,6 +89,10 @@ void GPIO::setDirection(DIRECTION dir) {
 }
 
 void GPIO::setPort(unsigned port) {
+
+    if (port == this->port)
+        return ;
+
     this->unexportPort();
     this->port = port;
     this->exportPort();
@@ -107,7 +136,7 @@ void GPIO::high() const {
     std::ofstream out(ss.str().c_str());
 
     if (out.fail()) {
-        std::cout << "set gpio " << this->port 
+        std::cout << "set gpio" << this->port 
                     << " to high fail!" << std::endl;
         return ;
     }
@@ -125,7 +154,7 @@ void GPIO::low() const {
     std::ofstream out(ss.str().c_str());
 
     if (out.fail()) {
-        std::cout << "set gpio " << this->port 
+        std::cout << "set gpio" << this->port 
                     << " to low fail!" << std::endl;
         return ;
     }
@@ -169,8 +198,8 @@ void GPIO::exportPort() const {
 }
 
 void GPIO::set(unsigned port, DIRECTION dir) {
-    this->setPort(port);
     this->setDirection(dir);
+    this->setPort(port);
 }
 
 GPIO::~GPIO() {
